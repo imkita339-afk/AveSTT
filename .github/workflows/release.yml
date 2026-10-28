@@ -1,0 +1,43 @@
+name: Release
+
+# Новая версия: поменять __version__ в app/version.py, закоммитить и отправить тег:
+#   git tag v1.0.1 && git push origin v1.0.1
+# Сборка создаст релиз с двумя установщиками, а программы у пользователей предложат обновиться.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check version matches tag
+        shell: pwsh
+        run: |
+          $v = (python -c "import sys; sys.path.insert(0, '.'); from app.version import __version__; print(__version__)").Trim()
+          if ("v$v" -ne "${{ github.ref_name }}") { throw "app/version.py ($v) не совпадает с тегом ${{ github.ref_name }}" }
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
+
+      - name: Build
+        shell: pwsh
+        run: |
+          python -m venv .venv
+          ./build.ps1
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.exe
+          generate_release_notes: true

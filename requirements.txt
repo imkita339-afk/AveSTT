@@ -1,0 +1,5 @@
+faster-whisper==1.2.1
+# faster-whisper 1.2.x передаёт в av.open() аргумент metadata_errors, убранный в PyAV 16
+av>=13,<16
+pywebview==6.2.1
+python-docx==1.2.0

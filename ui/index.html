@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AveSTT</title>
+<script>
+  // Применяем тему до отрисовки, чтобы не было вспышки
+  (function () {
+    var t = 'system';
+    try { t = localStorage.getItem('avestt-theme') || 'system'; } catch (e) {}
+    if (t === 'system') t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    document.documentElement.dataset.theme = t;
+  })();
+</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="g-brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8B5CF6"/><stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+  <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+  <symbol id="i-film" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18M3 7.5h4M3 12h18M3 16.5h4M17 3v18M17 7.5h4M17 16.5h4"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M6 3l14 9-14 9V3z"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect width="14" height="14" x="5" y="5" rx="2"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8M16 17H8M10 9H8"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4M12 16V8"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M12 20h.01M8.5 16.43a5 5 0 0 1 7 0M2 8.82a15 15 0 0 1 4.17-2.65M10.66 5c4.01-.36 8.14.9 11.34 3.76M16.85 11.25a10 10 0 0 1 2.22 1.68M5 13a10 10 0 0 1 5.24-2.76M2 2l20 20"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/></symbol>
+</svg>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 40 40"><rect width="40" height="40" rx="11" fill="url(#g-brand)"/>
+          <g fill="#fff"><rect x="9" y="16" width="3.2" height="8" rx="1.6"/><rect x="14.6" y="11" width="3.2" height="18" rx="1.6"/>
+          <rect x="20.2" y="14" width="3.2" height="12" rx="1.6"/><rect x="25.8" y="9" width="3.2" height="22" rx="1.6" opacity=".9"/></g></svg>
+      </div>
+      <div class="brand-text"><b>AveSTT</b><span>Речь в текст</span></div>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" data-page="transcribe"><svg class="ic"><use href="#i-mic"/></svg><span>Расшифровка</span><span class="nav-badge" id="busy-dot" hidden></span></button>
+      <button class="nav-item" data-page="history"><svg class="ic"><use href="#i-history"/></svg><span>История</span></button>
+      <button class="nav-item" data-page="models"><svg class="ic"><use href="#i-cpu"/></svg><span>Модели</span></button>
+      <button class="nav-item" data-page="settings"><svg class="ic"><use href="#i-settings"/></svg><span>Настройки</span><span class="nav-pill" id="update-pill" hidden>new</span></button>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="offline-pill"><span class="pulse"></span>Работает без интернета</div>
+      <button class="theme-quick" id="theme-quick" title="Сменить тему"><svg class="ic"><use href="#i-moon"/></svg></button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="update-banner" id="update-banner" hidden>
+      <svg class="ic"><use href="#i-sparkle"/></svg>
+      <span>Доступна новая версия <b id="update-banner-ver"></b></span>
+      <button class="btn btn-sm btn-primary" id="update-banner-go">Обновить</button>
+      <button class="btn-icon btn-sm" id="update-banner-close" title="Скрыть"><svg class="ic"><use href="#i-x"/></svg></button>
+    </div>
+
+    <!-- ============ РАСШИФРОВКА ============ -->
+    <section class="page active" id="page-transcribe">
+      <div class="workspace">
+        <div class="col-left">
+          <header class="page-head">
+            <h1>Расшифровка</h1>
+            <p>Аудио и видео в текст — прямо на вашем компьютере</p>
+          </header>
+
+          <button class="dropzone" id="dropzone">
+            <div class="dz-icon"><svg class="ic"><use href="#i-upload"/></svg></div>
+            <div class="dz-title">Перетащите файлы сюда</div>
+            <div class="dz-sub">или <u>нажмите, чтобы выбрать</u></div>
+            <div class="dz-formats">MP3 · WAV · M4A · OGG · FLAC · MP4 · MKV · AVI · MOV · WEBM и другие</div>
+          </button>
+
+          <div class="card options">
+            <div class="opt-row">
+              <label class="field">
+                <span class="field-label"><svg class="ic"><use href="#i-cpu"/></svg>Модель</span>
+                <div class="select"><select id="opt-model"></select></div>
+              </label>
+              <label class="field">
+                <span class="field-label"><svg class="ic"><use href="#i-globe"/></svg>Язык речи</span>
+                <div class="select"><select id="opt-language"></select></div>
+              </label>
+            </div>
+            <div class="segmented full" id="opt-task">
+              <button data-value="transcribe">Расшифровать</button>
+              <button data-value="translate">Перевести на английский</button>
+            </div>
+            <div class="notice" id="no-models" hidden>
+              <svg class="ic"><use href="#i-alert"/></svg>
+              <span>Нет установленных моделей. <a href="#" data-goto="models">Скачать модель</a></span>
+            </div>
+          </div>
+
+          <div class="queue-head">
+            <h3>Очередь <span class="count" id="queue-count"></span></h3>
+            <button class="btn-link" id="clear-finished" hidden>Очистить готовые</button>
+          </div>
+          <div class="queue" id="queue">
+            <div class="queue-empty">Файлы, которые вы добавите, появятся здесь</div>
+          </div>
+          <div class="start-bar">
+            <button class="btn btn-primary btn-lg" id="start-btn" disabled>
+              <svg class="ic"><use href="#i-play"/></svg><span>Начать расшифровку</span>
+            </button>
+            <button class="btn btn-lg btn-danger-soft" id="stop-btn" hidden>
+              <svg class="ic"><use href="#i-stop"/></svg><span>Остановить</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card viewer" id="viewer-main"></div>
+      </div>
+    </section>
+
+    <!-- ============ ИСТОРИЯ ============ -->
+    <section class="page" id="page-history">
+      <div class="workspace">
+        <div class="col-left">
+          <header class="page-head">
+            <h1>История</h1>
+            <p>Все расшифровки хранятся только на этом компьютере</p>
+          </header>
+          <div class="search">
+            <svg class="ic"><use href="#i-search"/></svg>
+            <input id="history-search" placeholder="Поиск по названию и тексту">
+          </div>
+          <div class="history-list" id="history-list"></div>
+        </div>
+        <div class="card viewer" id="viewer-history"></div>
+      </div>
+    </section>
+
+    <!-- ============ МОДЕЛИ ============ -->
+    <section class="page" id="page-models">
+      <div class="page-wrap">
+        <header class="page-head">
+          <h1>Модели распознавания</h1>
+          <p>Скачайте модель один раз — дальше она работает без интернета. Чем больше модель, тем точнее текст, но дольше расшифровка.</p>
+        </header>
+        <div class="models-grid" id="models-grid"></div>
+      </div>
+    </section>
+
+    <!-- ============ НАСТРОЙКИ ============ -->
+    <section class="page" id="page-settings">
+      <div class="page-wrap narrow">
+        <header class="page-head">
+          <h1>Настройки</h1>
+          <p>Изменения сохраняются автоматически</p>
+        </header>
+
+        <div class="card settings-card">
+          <h2>Внешний вид</h2>
+          <div class="setting">
+            <div class="setting-text"><b>Тема оформления</b><span>Светлая, тёмная или как в Windows</span></div>
+          </div>
+          <div class="theme-picker" id="theme-picker">
+            <button data-value="light">
+              <div class="theme-preview tp-light"><i></i><i></i><i></i></div>
+              <span><svg class="ic"><use href="#i-sun"/></svg>Светлая</span>
+            </button>
+            <button data-value="dark">
+              <div class="theme-preview tp-dark"><i></i><i></i><i></i></div>
+              <span><svg class="ic"><use href="#i-moon"/></svg>Тёмная</span>
+            </button>
+            <button data-value="system">
+              <div class="theme-preview tp-system"><i></i><i></i><i></i></div>
+              <span><svg class="ic"><use href="#i-monitor"/></svg>Как в системе</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card settings-card">
+          <h2>Распознавание</h2>
+          <div class="setting">
+            <div class="setting-text"><b>Пропускать тишину</b><span>Быстрее и меньше «мусора» в тексте на паузах</span></div>
+            <label class="switch"><input type="checkbox" id="set-vad"><span></span></label>
+          </div>
+          <div class="setting">
+            <div class="setting-text"><b>Потоки процессора: <span id="threads-val"></span></b><span>Больше — быстрее, но компьютер будет загружен сильнее</span></div>
+            <input type="range" id="set-threads" min="1" max="8" step="1">
+          </div>
+        </div>
+
+        <div class="card settings-card">
+          <h2>Результат</h2>
+          <div class="setting">
+            <div class="setting-text"><b>Отметки времени</b><span>Добавлять время к каждой фразе при копировании и сохранении в TXT/Word</span></div>
+            <label class="switch"><input type="checkbox" id="set-ts"><span></span></label>
+          </div>
+          <div class="setting">
+            <div class="setting-text"><b>Автосохранение</b><span>Сразу сохранять .txt рядом с исходным файлом</span></div>
+            <label class="switch"><input type="checkbox" id="set-autosave"><span></span></label>
+          </div>
+        </div>
+
+        <div class="card settings-card" id="update-card">
+          <h2>Обновления</h2>
+          <div class="update-box">
+            <div class="update-icon"><svg class="ic"><use href="#i-up"/></svg></div>
+            <div class="update-info">
+              <b id="upd-title">Версия <span id="cur-version"></span></b>
+              <span id="upd-status">Нажмите «Проверить», чтобы узнать о новой версии</span>
+            </div>
+            <div class="update-actions" id="upd-actions">
+              <button class="btn" id="upd-check"><svg class="ic"><use href="#i-retry"/></svg><span>Проверить</span></button>
+            </div>
+          </div>
+          <div class="progress big" id="upd-progress" hidden><i></i></div>
+          <div class="upd-notes" id="upd-notes" hidden></div>
+          <div class="setting">
+            <div class="setting-text"><b>Проверять при запуске</b><span>Только если есть интернет. Без интернета программа работает как обычно</span></div>
+            <label class="switch"><input type="checkbox" id="set-autoupdate"><span></span></label>
+          </div>
+        </div>
+
+        <div class="card settings-card about">
+          <div class="logo small">
+            <svg viewBox="0 0 40 40"><rect width="40" height="40" rx="11" fill="url(#g-brand)"/>
+              <g fill="#fff"><rect x="9" y="16" width="3.2" height="8" rx="1.6"/><rect x="14.6" y="11" width="3.2" height="18" rx="1.6"/>
+              <rect x="20.2" y="14" width="3.2" height="12" rx="1.6"/><rect x="25.8" y="9" width="3.2" height="22" rx="1.6" opacity=".9"/></g></svg>
+          </div>
+          <div class="setting-text"><b>AveSTT <span id="about-version"></span></b><span>Распознавание на движке Whisper. Ваши файлы никуда не отправляются.</span></div>
+          <button class="btn" id="open-repo"><svg class="ic"><use href="#i-link"/></svg><span>GitHub</span></button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="drop-overlay" id="drop-overlay">
+  <div class="drop-overlay-inner">
+    <div class="dz-icon big"><svg class="ic"><use href="#i-upload"/></svg></div>
+    <div>Отпустите, чтобы добавить файлы</div>
+  </div>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-box">
+    <h3 id="modal-title"></h3>
+    <p id="modal-text"></p>
+    <div class="modal-actions">
+      <button class="btn" id="modal-cancel">Отмена</button>
+      <button class="btn btn-danger" id="modal-ok">Удалить</button>
+    </div>
+  </div>
+</div>
+
+<div class="menu" id="export-menu" hidden>
+  <button data-fmt="txt"><svg class="ic"><use href="#i-file"/></svg>Текст <small>.txt</small></button>
+  <button data-fmt="docx"><svg class="ic"><use href="#i-file"/></svg>Word <small>.docx</small></button>
+  <button data-fmt="srt"><svg class="ic"><use href="#i-film"/></svg>Субтитры <small>.srt</small></button>
+  <button data-fmt="vtt"><svg class="ic"><use href="#i-film"/></svg>Субтитры <small>.vtt</small></button>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
